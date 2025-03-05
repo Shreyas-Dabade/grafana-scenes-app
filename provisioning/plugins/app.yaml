@@ -1,0 +1,12 @@
+apiVersion: 1
+
+apps:
+  - type: 'shreyas-scenes-app'
+    org_id: 1
+    org_name: 'shreyas'
+    disabled: false
+    jsonData:
+      apiUrl: http://default-url.com
+      isApiKeySet: true
+    secureJsonData:
+      apiKey: secret-key
