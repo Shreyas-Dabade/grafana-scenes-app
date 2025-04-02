@@ -5,16 +5,16 @@ import { config } from '@grafana/runtime';
 import { Alert } from '@grafana/ui';
 import { DATASOURCE_REF } from '../../constants';
 import { PluginPropsContext } from '../../utils/utils.plugin';
-import { helloWorldPage } from '../../pages/HelloWorld/helloWorldPage';
+import { promQlPage } from '../../pages/PromqlRendrer/promQlPage';
 import { homePage } from '../../pages/Home/homePage';
 import { withDrilldownPage } from '../../pages/WithDrilldown/withDrilldownPage';
 import { withTabsPage } from '../../pages/WithTabs/withTabsPage';
 import { newStaticPage } from '../../pages/newStaticPage/newStaticPage';
-import { queryLlamaPage } from '../../pages/llm-try/queryLlamaPage';
+import { queryLlamaPage } from "../../pages/llm-try/queryLlamaPage";
 
 function getSceneApp() {
   return new SceneApp({
-    pages: [helloWorldPage, homePage, withDrilldownPage, withTabsPage,newStaticPage,queryLlamaPage],
+    pages: [promQlPage, homePage, withDrilldownPage, withTabsPage,newStaticPage,queryLlamaPage],
     urlSyncOptions: {
       updateUrlOnInit: true,
       createBrowserHistorySteps: true,

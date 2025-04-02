@@ -3,7 +3,7 @@ services:
     extends:
       file: .config/docker-compose-base.yaml
       service: grafana
-      depends_on:
+    depends_on:
       - prometheus
 
   prometheus:
@@ -16,3 +16,17 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     restart: unless-stopped
+
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - "--path.procfs=/proc"
+      - "--path.sysfs=/sys"
+    volumes:
+      - "/proc:/host/proc:ro"
+      - "/sys:/host/sys:ro"

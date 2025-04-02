@@ -6,7 +6,7 @@ export enum ROUTES {
   Home = 'home',
   WithTabs = 'page-with-tabs',
   WithDrilldown = 'page-with-drilldown',
-  HelloWorld = 'hello-world',
+  PromqlRendrer = 'promQl-graph-renderer',
   NewStaticPage = 'new-static-page',
   llmquery='query-llama',
 

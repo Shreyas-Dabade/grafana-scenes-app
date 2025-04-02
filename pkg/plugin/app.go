@@ -1,7 +1,10 @@
 package plugin
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -9,42 +12,72 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 )
 
-// Make sure App implements required interfaces. This is important to do
-// since otherwise we will only get a not implemented error response from plugin in
-// runtime. Plugin should not implement all these interfaces - only those which are
-// required for a particular task.
-var (
-	_ backend.CallResourceHandler   = (*App)(nil)
-	_ instancemgmt.InstanceDisposer = (*App)(nil)
-	_ backend.CheckHealthHandler    = (*App)(nil)
-)
-
-// App is an example app backend plugin which can respond to data queries.
+// App is the backend plugin instance.
 type App struct {
 	backend.CallResourceHandler
 }
 
-// NewApp creates a new example *App instance.
+// NewApp creates a new instance of the App.
 func NewApp(_ context.Context, _ backend.AppInstanceSettings) (instancemgmt.Instance, error) {
 	var app App
 
-	// Use a httpadapter (provided by the SDK) for resource calls. This allows us
-	// to use a *http.ServeMux for resource calls, so we can map multiple routes
-	// to CallResource without having to implement extra logic.
+	// Register the resource handler with the correct path
 	mux := http.NewServeMux()
-	app.registerRoutes(mux)
+	mux.HandleFunc("/api/query-llama", app.handleQuery)
+
+	// Adapt the handler for Grafana
 	app.CallResourceHandler = httpadapter.New(mux)
 
 	return &app, nil
 }
 
-// Dispose here tells plugin SDK that plugin wants to clean up resources when a new instance
-// created.
-func (a *App) Dispose() {
-	// cleanup
+// handleQuery processes the query and forwards it to the Python FastAPI server.
+func (a *App) handleQuery(w http.ResponseWriter, r *http.Request) {
+	// Ensure it's a POST request
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the request body
+	var request struct {
+		Query string `json:"query"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Forward the request to the Python server
+	pythonURL := "http://localhost:8000/query-llama"
+	reqBody, _ := json.Marshal(map[string]string{
+		"query": request.Query,
+	})
+	resp, err := http.Post(pythonURL, "application/json", bytes.NewBuffer(reqBody))
+	if err != nil {
+		http.Error(w, "Failed to connect to Llama backend", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read response from Python server
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, "Failed to read response from Llama backend", http.StatusInternalServerError)
+		return
+	}
+
+	// Send the response back to the frontend
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 }
 
-// CheckHealth handles health checks sent from Grafana to the plugin.
+// Dispose cleans up resources.
+func (a *App) Dispose() {
+	// No cleanup needed
+}
+
+// CheckHealth handles health checks.
 func (a *App) CheckHealth(_ context.Context, _ *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
 	return &backend.CheckHealthResult{
 		Status:  backend.HealthStatusOk,

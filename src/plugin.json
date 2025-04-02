@@ -4,10 +4,10 @@
   "name": "Scenes",
   "id": "shreyas-scenes-app",
   "backend": true,
-  "executable": "gpx_scenes",
+  "executable": "shreyas-scenes-backend",
   "info": {
-    "keywords": ["app"],
-    "description": "",
+    "keywords": ["grafana", "plugin", "scenes", "llama"],
+    "description": "A Grafana app plugin for scene management with Llama 3 Chat integration.",
     "author": {
       "name": "Shreyas"
     },
@@ -25,26 +25,26 @@
       "name": "Home",
       "path": "/a/%PLUGIN_ID%/home",
       "addToNav": true,
-      "defaultNav": true
+      "defaultNav": false
     },
     {
       "type": "page",
-      "name": "Page with tabs",
+      "name": "Page with Tabs",
       "path": "/a/%PLUGIN_ID%/page-with-tabs",
       "addToNav": true,
       "defaultNav": false
     },
     {
       "type": "page",
-      "name": "Page with drilldown",
+      "name": "Page with Drilldown",
       "path": "/a/%PLUGIN_ID%/page-with-drilldown",
       "addToNav": true,
       "defaultNav": false
     },
     {
       "type": "page",
-      "name": "Hello world",
-      "path": "/a/%PLUGIN_ID%/hello-world",
+      "name": "PromQl Rendrer",
+      "path": "/a/%PLUGIN_ID%/promQl-graph-renderer",
       "addToNav": true,
       "defaultNav": false
     },
@@ -60,7 +60,7 @@
       "name": "Llama 3 Chat",
       "path": "/a/%PLUGIN_ID%/query-llama",
       "addToNav": true,
-      "defaultNav": false
+      "defaultNav": true
     }        
   ],
   "dependencies": {

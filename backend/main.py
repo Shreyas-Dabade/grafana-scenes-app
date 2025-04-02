@@ -1,19 +1,24 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import ollama
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+
+# Import API routers
+from ollama_api import router as ollama_router
+from prometheus_api import router as prometheus_router
 
 app = FastAPI()
 
-# Define request body model
-class QueryRequest(BaseModel):
-    prompt: str
+# Enable CORS (Modify `allow_origins` for security in production)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Define a route to interact with Llama 3
-@app.post("/query")
-async def query_llama(request: QueryRequest):
-    try:
-        response = ollama.chat(model="llama3", messages=[{"role": "user", "content": request.prompt}])
-        return {"response": response["message"]["content"]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# Include routers
+app.include_router(ollama_router, prefix="/llama", tags=["Llama API"])
+app.include_router(prometheus_router, prefix="/prometheus", tags=["Prometheus API"])
 
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
